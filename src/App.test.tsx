@@ -1,9 +1,16 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+//import { render } from '@testing-library/react';
 import App from './App';
+import { shallow } from 'enzyme';
 
-test('renders learn react link', () => {
-  const { getByText } = render(<App />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test('renders app component correctly', () => {
+  const wrapper = shallow(<App />);
+  const app = wrapper.find(`[className="App"]`);
+  expect(app.length).toBe(1);
+});
+
+test('renders child components', () => {
+  const wrapper = shallow(<App />);
+  const app = wrapper.find(`[className="App"]`);
+  expect(app.children().length).toBe(1);
 });
