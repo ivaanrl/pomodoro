@@ -1,32 +1,61 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import allActions from '../../actions';
 import { StoreState } from '../../reducers';
+import TimerControls from '../TimerControls/TimerControls';
+import './Timer.scss';
 
 let timerInterval: NodeJS.Timeout;
 export const Timer = () => {
   const dispatch = useDispatch();
+  const [startButtonDisabled, setStartButtonDisabled] = useState(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   let workTime = useSelector((state: StoreState) => state.timer.work);
-  //let breakTime = useSelector((state: StoreState) => state.timer.break)
-  const startTimer = (time: number) => {
-    timerInterval = setInterval(reduceTime, time);
+  let breakTime = useSelector((state: StoreState) => state.timer.break);
+  let fixWorkTime = useSelector((state: StoreState) => state.timer.fixWork);
+  let fixBreakTime = useSelector((state: StoreState) => state.timer.fixBreak);
+
+  const startTimer = () => {
+    setStartButtonDisabled(true);
+    timerInterval = setInterval(reduceTime, 1000);
   };
 
-  const reduceTime = () => {
-    if (workTime === 0) {
-      clearInterval(timerInterval);
-    } else {
+  const reduceTime = async () => {
+    if (workTime > 0) {
       workTime = workTime - 1;
-      dispatch(allActions.startTimer(workTime));
+      if (workTime === 0) {
+        clearInterval(timerInterval);
+        audioRef.current?.play();
+        audioRef.current?.play();
+        startTimer();
+      }
+    } else {
+      breakTime -= 1;
+    }
+    dispatch(allActions.startTimer({ work: workTime, break: breakTime }));
+
+    if (breakTime === 0) {
+      clearInterval(timerInterval);
+      audioRef.current?.play();
+      audioRef.current?.play();
+      dispatch(allActions.resetTimer());
+
+      workTime = fixWorkTime;
+      breakTime = fixBreakTime;
+      startTimer();
     }
   };
   const resetTimer = () => {
-    dispatch(allActions.resetTimer());
     clearInterval(timerInterval);
+    dispatch(allActions.hardResetTimer());
+    setStartButtonDisabled(false);
   };
 
   const stopTimer = () => {
     clearInterval(timerInterval);
+    setStartButtonDisabled(false);
   };
 
   const formatTime = (time: number) => {
@@ -35,23 +64,47 @@ export const Timer = () => {
     return `${mins}:${secs}`;
   };
 
+  let timer = (
+    <div className="timer">
+      <div className="work-text">LET'S GET TO WORK!</div>
+      <div className="work-timer">{formatTime(workTime)}</div>
+    </div>
+  );
+
+  if (workTime === 0) {
+    timer = (
+      <div className="timer">
+        <div className="work-text">TIME TO GET A BREAK</div>
+        <div className="work-timer">{formatTime(breakTime)}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="timer-container">
-      <div className="timer">{formatTime(workTime)}</div>
+      {timer}
       <div className="button-container">
         <button
           className="btn start-timer"
-          onClick={() => startTimer(workTime)}
+          disabled={startButtonDisabled}
+          onClick={() => startTimer()}
         >
           START
         </button>
         <button className="btn" onClick={stopTimer}>
           STOP
         </button>
-        <button className="btn" onClick={resetTimer}>
+        <button className="btn res-timer" onClick={resetTimer}>
           RESET
         </button>
       </div>
+      <TimerControls />
+      <audio ref={audioRef}>
+        <source
+          src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"
+          type="audio/mpeg"
+        ></source>
+      </audio>
     </div>
   );
 };

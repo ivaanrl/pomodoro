@@ -1,5 +1,10 @@
 export enum ActionTypes {
   startTimer,
   pauseTimer,
-  resetTimer
+  resetTimer,
+  increaseWorkTimer,
+  decreaseWorkTimer,
+  increaseBreakTimer,
+  decreaseBreakTimer,
+  hardResetTimer
 }

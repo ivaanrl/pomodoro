@@ -4,6 +4,8 @@ export interface StoreState {
   timer: {
     work: number;
     break: number;
+    fixWork: number;
+    fixBreak: number;
   };
 }
 

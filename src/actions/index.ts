@@ -1,9 +1,23 @@
-import { startTimer, pauseTimer, resetTimer } from './timer';
+import {
+  startTimer,
+  pauseTimer,
+  resetTimer,
+  increaseBreakTimer,
+  increaseWorkTimer,
+  decreaseBreakTimer,
+  decreaseWorkTimer,
+  hardResetTimer
+} from './timer';
 
 const allActions = {
   startTimer,
   pauseTimer,
-  resetTimer
+  resetTimer,
+  increaseBreakTimer,
+  increaseWorkTimer,
+  decreaseBreakTimer,
+  decreaseWorkTimer,
+  hardResetTimer
 };
 
 export default allActions;

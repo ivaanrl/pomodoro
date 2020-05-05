@@ -1,13 +1,16 @@
-import { Timer } from './Timer';
+import Timer, { Timer as TimerConnected } from './Timer';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { timer } from '../../reducers/timer';
-import { useDispatch } from 'react-redux';
-import { rootReducer } from '../../reducers';
 import { ActionTypes } from '../../actions/types';
 
-jest.mock('react-redux');
-const wrapper = shallow(<Timer />);
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  useSelector: jest.fn(),
+  useDispatch: () => mockDispatch
+}));
+const wrapperConnected = shallow(<Timer />);
+const wrapper = shallow(<TimerConnected />);
+
 test('renders timer correctly', () => {
   const timer = wrapper.find('.timer');
   expect(timer.length).toBe(1);
@@ -18,10 +21,21 @@ test('renders buttons correctly', () => {
   expect(buttons.length).toBe(3);
 });
 
-//test('should call action in reducer with modified time', () => {
-//  const button = wrapper.find('.start-timer');
-//  button.simulate('click');
-//  expect(rootReducer(undefined, { type: ActionTypes.startTimer })).toEqual(
-//    1600
-//  );
-//});
+test('renders time container correctly', () => {
+  const timerContainer = wrapper.find('.timer-container');
+  expect(timerContainer.length).toBe(1);
+});
+
+test('Timer is reseted when reset button is clicked', () => {
+  const button = wrapperConnected.find('.start-timer');
+  button.simulate('click');
+  wrapper.update();
+
+  const resButton = wrapperConnected.find('.res-timer');
+  resButton.simulate('click');
+  wrapper.update();
+
+  expect(mockDispatch).toHaveBeenCalledWith({
+    type: ActionTypes.hardResetTimer
+  });
+});
